@@ -111,10 +111,9 @@ The OSM-derived database is distributed under **ODbL 1.0**; attribution and shar
 
 ```bash
 node build.mjs
-open modu-nightrun.html
 ```
 
-Node.js and a WebGL-capable browser are required. There are no npm dependencies.
+Open `modu-nightrun.html` in a WebGL-capable browser. Node.js and a WebGL-capable browser are required; there are no npm dependencies.
 
 ### GitHub Pages preview
 
@@ -186,7 +185,7 @@ DISCLAIMER.md                 technical scope, fiction, compliance, privacy
 
 ## Verification
 
-Development used an internal harness, not distributed with this repository, with eight gates: shaders, census, collide, lights, playtest, product, mobile, and look. The last recorded full pass is from an earlier build; the harness has not been re-run against the current documentation and licensing revision.
+An internal eight-gate harness was used during development and is not distributed with this repository. The gates cover shaders, scene census, collisions, lighting, playtest, product shell, mobile layout, and visual look. The last recorded pass predates this revision; the checks below are reproducible from the repository.
 
 Reproducible checks:
 
@@ -204,7 +203,6 @@ Screenshots and performance figures come from a development machine; GPU, browse
 - Tunnel portals are not fully modelled; the tunnel segments are still drawn as surface roads, and vehicles cannot cross the river underground.
 - The waterfront around the landmark tower remains sparse; some road surfaces and street furniture are procedural simplifications.
 - The 1:1 geometry and building massing remain recognisable despite rewritten names. The demo is not a map service and must not be used for navigation, surveying, or safety-critical purposes.
-- The internal verification harness is not part of the repository.
 - The project is a technical demo and makes no compatibility or maintenance guarantees.
 
 ---
