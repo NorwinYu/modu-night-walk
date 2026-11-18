@@ -32,9 +32,6 @@ shots/
 .env.*
 !.env.example
 
-# local compliance notes (not published)
-/AUDIT.local.md
-
 # local backups / patches
 *.bak
 *.orig
