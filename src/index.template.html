@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#05070c">
+<title>魔都夜行 — MODU NIGHT WALK</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2305070c'/%3E%3Cpath d='M31 6l3 19 10 4-9 5-3 22-3-22-9-5 10-4z' fill='%23ff4fd8'/%3E%3C/svg%3E">
+<style>/*__STYLE__*/</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="c"></canvas>
+  <div id="grade" aria-hidden="true"></div>
+
+  <!-- ============================ HUD ============================ -->
+  <div id="hud" class="hidden">
+    <div id="hud-top">
+      <div class="panel" id="objective-card">
+        <div class="eyebrow"><span class="pulse-dot"></span> <span id="obj-eyebrow">委托 · 老周</span></div>
+        <div id="objective">明信片 0/5 · 去星珠塔取景</div>
+        <div class="objective-meta">
+          <span id="beat-dots">○ ○ ○ ○ ○ ○</span>
+          <span id="objective-distance">0 m</span>
+        </div>
+      </div>
+
+      <div class="panel" id="clock-card">
+        <div class="eyebrow" id="clock-eyebrow">今夜 · 小雨</div>
+        <div id="timer">23:00</div>
+        <div class="objective-meta"><span id="timer-label">渡轮 23:30 · 30 分</span><span id="stamp-count">委托 0 / 7</span></div>
+      </div>
+
+      <div id="map-wrap">
+        <canvas id="minimap" width="220" height="220"></canvas>
+        <div id="map-ring"></div>
+        <div id="compass-row">
+          <span id="compass-arrow">▲</span>
+          <span id="compass-text">朝北 · 星珠塔 0 m</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="notif" class="hidden" role="status">
+      <i id="nf-ic">满</i>
+      <div class="nf-body"><div class="nf-top"><b id="nf-title">小满</b><small id="nf-t">23:00</small></div><p id="nf-text"></p></div>
+    </div>
+
+    <div id="hud-bottom">
+      <div id="speed-cluster">
+        <div id="speed">0</div>
+        <div class="speed-unit">KM/H</div>
+        <div id="gear">N</div>
+        <div id="rpm-track"><div id="rpm-fill"></div></div>
+        <div id="vehicle-name">步行 · 观澜大道</div>
+      </div>
+
+      <div id="status-cluster">
+        <div class="bar-row">
+          <span class="bar-label" id="bar1-label">体力</span>
+          <div class="bar"><div id="health-fill"></div></div>
+          <span id="health-num">100</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" id="bar2-label">体温</span>
+          <div class="bar nitro"><div id="nitro-fill"></div></div>
+          <span id="nitro-num">100</span>
+        </div>
+        <div id="wallet-row">
+          <span id="wallet">¥300</span>
+          <span id="licence">声望 0</span>
+          <span id="stamp-total">手账 0/40</span>
+        </div>
+        <div id="tool-row">
+          <span class="tool">Tab 手机</span>
+          <span class="tool">Q 拍照</span>
+          <span class="tool">M 地图</span>
+          <span class="tool">T 扬招</span>
+          <span class="tool">H 手册</span>
+        </div>
+      </div>
+    </div>
+
+    <button id="phone-chip" aria-label="打开手机 (Tab)"><i class="pc-ico"></i><span>手机</span><b id="phone-batt">64%</b><em id="phone-badge" class="hidden">0</em><kbd>Tab</kbd></button>
+    <div id="phone" class="hidden" aria-label="手机">
+      <div class="ph-body">
+        <div class="ph-status"><span id="ph-time">23:00</span><i class="ph-island"></i><span class="ph-sig">5G ▮▮▮</span><span id="ph-batt"><i></i><em>64</em></span></div>
+        <div id="ph-screen"></div>
+        <div class="ph-nav"><button id="ph-back" aria-label="返回">‹</button><button id="ph-home" aria-label="主屏"><i></i></button><button id="ph-close" aria-label="收起">✕</button></div>
+      </div>
+    </div>
+
+    <button id="drone-chip" class="hidden"><b>V</b><span>无人机就绪 · 点击放飞</span><i>DRONE</i></button>
+    <div id="drone-hud" class="hidden">
+      <div class="dh-top">
+        <span class="dh-rec"><i></i>REC</span>
+        <span class="dh-mode" id="dh-mode">FPV</span>
+        <span class="dh-batt" id="dh-batt">100%</span>
+        <span class="dh-gps">GPS</span>
+      </div>
+      <div class="dh-cross"><i class="dh-h"></i><i class="dh-v"></i><i class="dh-dot"></i></div>
+      <div class="dh-data">
+        <div><span>ALT</span><b id="dh-alt">0.0 m</b></div>
+        <div><span>DIST</span><b id="dh-dist">0 m</b></div>
+        <div><span>SPD</span><b id="dh-spd">0.0</b></div>
+        <div><span>HDG</span><b id="dh-hdg">N</b></div>
+      </div>
+      <div class="dh-signal"><span id="dh-signal">▮▮▮▮</span><em>LINK</em></div>
+      <div class="dh-alert hidden" id="dh-alert">LOW BATTERY · 自动返航</div>
+      <div class="dh-hint">WASD 飞行 · SPACE / SHIFT 升降 · 鼠标 云台 · C 视角 · E 拍照 · V 返航</div>
+    </div>
+
+    <div id="center-stack">
+      <div id="subtitles"><span id="subtitle-speaker">旁白</span><span id="subtitle-text"></span></div>
+      <div id="prompt" class="hidden"><b>E</b><span id="prompt-text"></span></div>
+      <div id="bust-warning" class="hidden"></div>
+    </div>
+
+    <div id="viewfinder" class="hidden">
+      <div class="vf-corner tl"></div><div class="vf-corner tr"></div><div class="vf-corner bl"></div><div class="vf-corner br"></div>
+      <div class="vf-grid"></div>
+      <div id="vf-box"><div id="vf-label">寻找取景目标…</div><div id="vf-info">滚轮变焦 · E 拍摄 · Q 收起</div></div>
+    </div>
+    <div id="postcard" class="hidden">
+      <div class="pc-frame">
+        <div class="pc-art" id="pc-art"><span id="pc-art-name">星珠塔</span></div>
+        <div class="pc-meta"><b id="postcard-name">星珠塔</b><span id="postcard-score">+100</span></div>
+        <div class="pc-stamp" id="pc-stamp">23<br>00</div>
+      </div>
+    </div>
+    <div id="toast" class="hidden"></div>
+  </div>
+
+  <!-- ============================ MAP ============================ -->
+  <div id="bigmap" class="screen hidden">
+    <canvas id="bm-canvas"></canvas>
+    <div id="bm-head">
+      <div class="bm-title"><span>MAP · 魔都夜行</span><b>临江嘴 · 申东滨江</b></div>
+      <div id="bm-hint">拖动平移 · 滚轮 / 双指缩放 · 单击空白处放标记并导航 · 右键删除标记 · M / ESC 关闭</div>
+    </div>
+    <div id="bm-side">
+      <section><h4>导航</h4><div id="bm-nav"></div></section>
+      <section><h4>图例 · 点击显示 / 隐藏</h4><div id="bm-legend"></div></section>
+      <section><h4>我的标记 <button id="bm-clear" class="bm-mini">全部清除</button></h4><div id="bm-pins"></div></section>
+      <section class="grow"><h4>地点</h4><div id="bm-places"></div></section>
+    </div>
+    <div id="bm-tools">
+      <button id="bm-zin" title="放大 (+)">＋</button>
+      <button id="bm-zout" title="缩小 (−)">－</button>
+      <button id="bm-me" title="回到我的位置">◎</button>
+      <button id="bm-fit" title="看全图">⤢</button>
+      <button id="bm-manual" title="游戏手册 (H)">?</button>
+      <button id="bm-close" title="关闭 (M)">✕</button>
+    </div>
+    <div id="bm-scale"><i></i><span>100 m</span></div>
+    <div id="bm-tip" class="hidden"></div>
+    <div id="bm-pop" class="hidden"></div>
+  </div>
+
+  <!-- ========================== MANUAL =========================== -->
+  <div id="manual" class="screen hidden">
+    <div class="mn-wrap">
+      <nav id="mn-nav"></nav>
+      <article id="mn-body"></article>
+      <button id="mn-close" class="btn ghost">关闭 · H / ESC</button>
+    </div>
+  </div>
+
+  <!-- ========================== TITLE =========================== -->
+  <div id="title" class="screen">
+    <div class="title-scrim"></div>
+    <div class="title-inner">
+      <div class="title-kicker">
+        <span class="bar"></span>
+        <span>魔都 · 申东滨江 · 23:00</span>
+        <span class="bar short"></span>
+        <span>小雨 12°C</span>
+      </div>
+      <h1 class="title-main">魔都<span class="title-dot">·</span>夜行</h1>
+      <div class="title-en">MODU <span>NIGHT WALK</span></div>
+      <p class="title-premise">夜里十一点，雨下得正密。手机一直在震：朋友、街坊、陌生人都想请你帮个忙。<br>帮多少、逛多久随你，但零点前后，总得想办法回家。</p>
+      <div class="title-stats">
+        <div><span class="k">最高分</span><span class="v" id="best-time">—</span></div>
+        <div><span class="k">最佳评级</span><span class="v" id="best-grade">—</span></div>
+        <div><span class="k">已见结局</span><span class="v" id="ends-seen">0 / 4</span></div>
+        <div class="ts-home"><span class="k">回家的路</span><span class="v">渡轮 23:30 · 夜宵 N1 00:10 · 出租车 · 01:00 前</span></div>
+      </div>
+      <div class="title-actions">
+        <button id="start-btn" class="btn primary"><span class="btn-key">ENTER</span> 开始今夜 <span class="arrow">→</span></button>
+        <button id="mode-btn" class="btn">模式：今夜 23:00–01:00</button>
+        <button id="manual-btn" class="btn">手册 <span class="btn-key">H</span></button>
+        <button id="settings-btn" class="btn">设置</button>
+      </div>
+      <div id="mode-desc">委托、拍照、闲逛随你安排。赶上哪班车决定结局，每种结局都评级；01:00 还没走就算滞留。</div>
+      <div class="title-controls">
+        <span><b>WASD</b> 走 / 开车</span><span><b>TAB</b> 手机</span><span><b>Q</b> 相机</span><span><b>E</b> 互动</span><span><b>F</b> 上下车</span>
+        <span><b>T</b> 扬招出租</span><span><b>V</b> 无人机</span><span><b>M</b> 地图</span><span><b>H</b> 手册</span><span><b>SHIFT</b> 跑</span><span><b>ESC</b> 暂停</span>
+      </div>
+      <div class="title-foot">单人 · 一夜约 40 分钟 · 非商业技术演示 · 不发行 · 地图数据 © OpenStreetMap contributors (ODbL) · 关于/许可见 H 手册</div>
+    </div>
+    <div class="title-phone" aria-hidden="true">
+      <div class="tp-glass">
+        <div class="tp-status"><span>魔都移动 5G</span><span>64%</span></div>
+        <div class="tp-time">23:00</div>
+        <div class="tp-date">星期五 · 小雨 12°C · 申东</div>
+        <div class="tp-notes">
+          <div class="tp-n"><i style="background:#ff8a3d">满</i><div><b>小满<small>刚刚</small></b><p>还在 L3 改稿……能帮我带杯热拿铁吗？凉了就不香了。</p></div></div>
+          <div class="tp-n"><i style="background:#ffd86b">周</i><div><b>老周 · 明信片铺<small>刚刚</small></b><p>今晚雨景难得，帮我拍五张城市明信片？按片子付钱。</p></div></div>
+          <div class="tp-n"><i style="background:#6fe6ff">夜</i><div><b>夜行电台<small>22:58</small></b><p>【出行】末班渡轮 23:30 · 夜宵 N1 00:10 · 23:34 起有短时强降雨。</p></div></div>
+        </div>
+        <div class="tp-unlock">按 ENTER 解锁 · 开始今夜</div>
+      </div>
+    </div>
+    <div class="title-credit">ONE RAINY NIGHT · SEVEN ERRANDS · THREE WAYS HOME</div>
+  </div>
+
+  <!-- ========================== PAUSE =========================== -->
+  <div id="pause" class="screen hidden">
+    <div class="modal">
+      <div class="modal-kicker">PAUSED · 暂停</div>
+      <h2>先歇一会儿。</h2>
+      <div class="pause-stats">
+        <div><span>当前目标</span><b id="pause-objective">—</b></div>
+        <div><span>时间 · 下一班</span><b id="pause-time">—</b></div>
+        <div><span>身体 · 手机</span><b id="pause-health">—</b></div>
+        <div><span>钱包 · 声望 · 委托</span><b id="pause-heat">—</b></div>
+      </div>
+      <div class="modal-actions">
+        <button id="resume-btn" class="btn primary">继续 <span class="btn-key">ESC</span></button>
+        <button id="pause-map-btn" class="btn">地图 <span class="btn-key">M</span></button>
+        <button id="pause-manual-btn" class="btn">手册 <span class="btn-key">H</span></button>
+        <button id="pause-settings-btn" class="btn">设置</button>
+        <button id="restart-btn" class="btn">重新开始</button>
+        <button id="menu-btn" class="btn ghost">返回标题</button>
+      </div>
+      <div class="modal-foot">暂停时时间停止；看手机时时间照走、人会停下。Tab 手机 · Q 相机 · M 地图 · H 手册 · N 静音</div>
+    </div>
+  </div>
+
+  <!-- ========================= SETTINGS ========================= -->
+  <div id="settings" class="screen hidden">
+    <div class="modal wide">
+      <div class="modal-kicker">SETTINGS · 设置</div>
+      <h2>按你的习惯来。</h2>
+      <div class="settings-grid">
+        <label class="setting"><span>鼠标灵敏度</span><input id="set-sens" type="range" min="0.2" max="3" step="0.05" value="1"><b id="set-sens-v">1.00</b></label>
+        <label class="setting"><span>主音量</span><input id="set-vol" type="range" min="0" max="1" step="0.01" value="0.7"><b id="set-vol-v">70%</b></label>
+        <label class="setting"><span>视野 FOV</span><input id="set-fov" type="range" min="55" max="92" step="1" value="68"><b id="set-fov-v">68°</b></label>
+        <label class="setting"><span>画质预设</span>
+          <select id="set-quality"><option value="low">低 / LOW</option><option value="medium">中 / MEDIUM</option><option value="high" selected>高 / HIGH</option><option value="ultra">极高 / ULTRA</option></select>
+          <b id="set-quality-v">HIGH</b>
+        </label>
+        <label class="setting toggle"><span>反转 Y 轴</span><input id="set-invert" type="checkbox"><b id="set-invert-v">关</b></label>
+        <label class="setting toggle"><span>鼠标锁定视角（点画面锁定 · Esc 释放）</span><input id="set-mlock" type="checkbox" checked><b id="set-mlock-v">开</b></label>
+        <label class="setting toggle"><span>雨天效果</span><input id="set-rain" type="checkbox" checked><b id="set-rain-v">开</b></label>
+      </div>
+      <div class="modal-actions">
+        <button id="settings-close-btn" class="btn primary">应用并返回</button>
+        <button id="settings-menu-btn" class="btn ghost">返回标题</button>
+      </div>
+      <div class="modal-foot">设置自动保存在本机。</div>
+    </div>
+  </div>
+
+  <!-- =========================== END ============================ -->
+  <div id="end" class="screen hidden">
+    <div class="modal end-modal">
+      <div class="modal-kicker" id="end-kicker">ENDING</div>
+      <h2 id="end-title">上船了。</h2>
+      <p id="end-cause"></p>
+      <div class="end-stats">
+        <div><span>结束时间</span><b id="end-time">—</b></div>
+        <div><span>委托 · 明信片</span><b id="end-health">—</b></div>
+        <div><span>总分</span><b id="end-heat">—</b></div>
+        <div><span>评级</span><b id="end-grade">—</b></div>
+        <div><span>最高记录</span><b id="end-best">—</b></div>
+      </div>
+      <div id="end-breakdown"></div>
+      <div class="modal-actions">
+        <button id="end-restart-btn" class="btn primary">再过一夜 <span class="btn-key">R</span></button>
+        <button id="end-menu-btn" class="btn ghost">返回标题</button>
+      </div>
+      <div class="modal-foot" id="end-foot"></div>
+    </div>
+  </div>
+
+  <!-- ========================== TOUCH =========================== -->
+  <div id="touch">
+    <div id="stick-zone"><div id="stick"><div id="stick-knob"></div></div><span>移动</span></div>
+    <div id="touch-look">拖动环视</div>
+    <div id="touch-buttons">
+      <button id="tb-nitro" class="tbtn nitro">跑</button>
+      <button id="tb-brake" class="tbtn">刹车</button>
+      <button id="tb-act" class="tbtn act">E</button>
+      <button id="tb-drone" class="tbtn">无人机</button>
+      <button id="tb-pause" class="tbtn small">II</button>
+    </div>
+    <div id="drone-touch" class="hidden">
+      <button id="dt-up" class="dbtn">升</button>
+      <button id="dt-down" class="dbtn">降</button>
+      <button id="dt-view" class="dbtn">视角</button>
+      <button id="dt-shot" class="dbtn act">拍</button>
+      <button id="dt-return" class="dbtn">返航</button>
+    </div>
+  </div>
+
+  <div id="boot"><span class="boot-dot"></span><span id="boot-text">魔都夜行 · 正在生成临江嘴…</span></div>
+</div>
+<script>/*__THREE__*/</script>
+<script>/*__GAME__*/</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+name: Deploy technical demo to GitHub Pages
+
+# This workflow builds the single-file demo from source and publishes it as a
+# technical preview on GitHub Pages. No build artifact is committed to the
+# repository, and no release/installer is produced.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build single-file demo
+        run: node build.mjs
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p _site
+          cp dist/modu-nightrun.html _site/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

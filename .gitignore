@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# 不随源码上传的内容 / files that must not be published
+# ---------------------------------------------------------------------------
+
+# macOS / Windows / editor metadata
+.DS_Store
+**/.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# dependencies and build output
+node_modules/
+dist/
+/modu-nightrun.html
+_site/
+*.log
+*.tmp
+*.zip
+*.tar.gz
+*.7z
+
+# verification screenshots (regenerate locally; not shipped)
+shots/
+
+# local environment / secrets
+.env
+.env.*
+!.env.example
+
+# local compliance notes (not published)
+/AUDIT.local.md
+
+# local backups / patches
+*.bak
+*.orig
+*.rej
