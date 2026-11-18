@@ -43,7 +43,11 @@ The narrative frame is a short night-errand loop: help a handful of residents, p
 | ![Phone / commissions](docs/screenshots/02-phone.jpg)<br><sub>Phone · commission list, objectives and rewards</sub> | ![Map / navigation](docs/screenshots/03-map.jpg)<br><sub>Map · districts, POIs, routes and user pins</sub> |
 | ![Drone / FPV](docs/screenshots/04-drone.jpg)<br><sub>Drone · FPV camera, altitude and signal HUD</sub> | ![Interior / lobby](docs/screenshots/05-interior.jpg)<br><sub>Interior · tower lobby and escalators</sub> |
 
-![Tower lighting programmes](docs/screenshots/06-lighting.jpg)
+![Waterfront skyline](docs/screenshots/06-skyline.jpg)
+
+<sub>Waterfront skyline · the landmark tower cluster (三件套) and the river bank at night.</sub>
+
+![Tower lighting programmes](docs/screenshots/07-lighting.jpg)
 
 <sub>Six lighting programmes for the landmark tower: classic pink, ice blue, champagne, rainbow ring, rising wave, starlight. Colours, lattice, rings, facade glow and plaza lights interpolate together.</sub>
 
